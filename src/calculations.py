@@ -3,7 +3,7 @@ def calculate_conversion_rate(conversions, visitors):
         raise TypeError("Conversions must be a non-negative integer")
 
     if not isinstance(visitors, int):
-            raise TypeError("Visitors must be a positive integer")
+        raise TypeError("Visitors must be a positive integer")
     
     if visitors <= 0:
         raise ValueError("Visitors must be greater than zero")
