@@ -13,10 +13,16 @@ def test_scenario_3():
 def test_scenario_4():
     assert calculate_conversion_rate(1, 3) == pytest.approx(1/3)
 
+def test_scenario_5():
+    assert calculate_conversion_rate(1, 1) == 1.0
+
+def test_scenario_6():
+    assert calculate_conversion_rate(99, 100) == 0.99
 
 @pytest.mark.parametrize("conversions, visitors, exc_message", [
     (10, 0, "Visitors must be greater than zero"),
     (10, -5, "Visitors must be greater than zero"),
+    (0, -1, "Visitors must be greater than zero"),
     (-1, 100, "Conversions cannot be negative"),
     (101, 100, "Conversions cannot exceed visitors")])
 def test_value_error_scenarios(conversions, visitors, exc_message):
