@@ -39,6 +39,21 @@ def test_calculate_order_revenue(sample_orders_df):
 def test_sample_orders_df_does_not_contain_revenue(sample_orders_df):
     assert "revenue" not in sample_orders_df
 
+@pytest.mark.parametrize(
+        "column_to_remove, exc_message",
+        [
+            ("quantity", "Missing required column: quantity"),
+            ("unit_price", "Missing required column: unit_price"),
+            ("order_id", "Missing required column: order_id")
+        ]
+        )
+def test_removing_column_from_sample_orders_df(sample_orders_df, column_to_remove, exc_message):
+    dropped_col_df = sample_orders_df.drop(columns=column_to_remove)
+    with pytest.raises(KeyError) as exc_info:
+        calculate_order_revenue(dropped_col_df)
+    assert str(exc_info.value.args[0]) == exc_message
+
+
 def test_empty_dataframe(empty_sample_orders_df):
     df = calculate_order_revenue(empty_sample_orders_df)
     assert "revenue" in df.columns.to_list()
