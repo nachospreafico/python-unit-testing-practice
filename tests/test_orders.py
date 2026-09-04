@@ -1,5 +1,6 @@
 from src.orders import calculate_order_revenue
 import pandas as pd
+import numpy as np
 import pytest
 
 @pytest.fixture
@@ -53,6 +54,19 @@ def test_removing_column_from_sample_orders_df(sample_orders_df, column_to_remov
         calculate_order_revenue(dropped_col_df)
     assert str(exc_info.value.args[0]) == exc_message
 
+@pytest.mark.parametrize(
+        "column_to_introduce_nan",
+        [
+            "quantity",
+            "unit_price"
+        ]
+)
+def test_nan_values_in_sample_orders_df(sample_orders_df, column_to_introduce_nan):
+    # Introduce NaN on desired column at row index 1
+    sample_orders_df.loc[1, column_to_introduce_nan] = np.nan
+    with pytest.raises(ValueError) as exc_info:
+        calculate_order_revenue(sample_orders_df)
+    assert str(exc_info.value) == f"Missing one or more values on column {column_to_introduce_nan}"
 
 def test_empty_dataframe(empty_sample_orders_df):
     df = calculate_order_revenue(empty_sample_orders_df)
