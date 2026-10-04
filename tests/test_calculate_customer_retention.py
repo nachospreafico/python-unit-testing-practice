@@ -68,9 +68,9 @@ def test_function_raises_key_error_when_missing_required_column(dropped_col, sam
 @pytest.mark.parametrize(
         "order_id_values, expected_error, expected_error_message",
         [
-            ([101, 102, 101, 104, 105, 106, 107, 108, 109, 110], ValueError, "Duplicated value in order_id. This is not allowed."),
-            ([101, 102, np.nan, 104, 105, 106, 107, 108, 109, 110], ValueError, "Missing value in order_id. This is not allowed."),
-            ([101, 102, np.nan, 104, 101, 106, 107, 108, 109, 110], ValueError, "Missing value in order_id. This is not allowed.")
+            ([101, 102, 101, 104, 105, 106, 107, 108, 109, 110], ValueError, "Duplicated value(s) in order_id. This is not allowed."),
+            ([101, 102, np.nan, 104, 105, 106, 107, 108, 109, 110], ValueError, "Missing value(s) in order_id. This is not allowed."),
+            ([101, 102, np.nan, 104, 101, 106, 107, 108, 109, 110], ValueError, "Missing value(s) in order_id. This is not allowed.")
         ]
 )
 def test_function_raises_proper_error_when_invalid_input_in_order_id(order_id_values, expected_error, expected_error_message, sample_input_df):
@@ -80,3 +80,18 @@ def test_function_raises_proper_error_when_invalid_input_in_order_id(order_id_va
     with pytest.raises(expected_error) as exc_info:
         calculate_customer_retention(df, ref_date)
     assert str(exc_info.value) == expected_error_message
+
+def test_function_raises_value_error_when_missing_customer_id(sample_input_df):
+    df = sample_input_df.copy()
+    ref_date = "2026-10-03"
+    df.loc[7, "customer_id"] = np.nan
+    with pytest.raises(ValueError) as exc_info:
+        calculate_customer_retention(df, ref_date)
+    assert str(exc_info.value) == "Missing value(s) in customer_id. This is not allowed."
+
+@pytest.mark.parametrize(
+    "order_date, expected_error, expected_error_message",
+    [""]
+)
+def test_function_raises_proper_errors_when_invalid_values_in_order_date():
+    pass
