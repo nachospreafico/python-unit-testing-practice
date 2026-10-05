@@ -21,3 +21,25 @@ def calculate_customer_retention(df, reference_date):
     # Check if missing values in customer_id
     if df["customer_id"].isna().any():
         raise ValueError("Missing value(s) in customer_id. This is not allowed.")
+    
+    # Convert order_date to datetime object, coerce errors
+    df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
+
+    # Check if errors in order_date
+    if df["order_date"].isna().any():
+        raise ValueError("Invalid date value(s) in order_date. This is not allowed.")
+    
+    # Check value types in revenue column
+    if not all(
+        type(revenue) is int or type(revenue) is float
+        for revenue in df["revenue"]
+    ):
+        raise TypeError("Invalid type(s) in revenue. This is not allowed.")
+    
+    # Check if missing values in revenue
+    if df["revenue"].isna().any():
+        raise ValueError("Missing value(s) in revenue. This is not allowed.")
+    
+    # Check if negative values in revenue
+    if (df["revenue"] < 0).any():
+        raise ValueError("Negative value(s) in revenue. This is not allowed.")
