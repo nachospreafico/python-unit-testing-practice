@@ -2,6 +2,7 @@ import pytest
 import pandas as pd
 from src.calculate_customer_retention import calculate_customer_retention
 import numpy as np
+from datetime import date, timedelta
 
 @pytest.fixture
 def sample_input_df():
@@ -122,3 +123,18 @@ def test_function_raises_proper_error_when_invalid_values_in_revenue(revenue_val
         calculate_customer_retention(df, ref_date)
     assert str(exc_info.value) == expected_error_msg
 
+@pytest.mark.parametrize(
+    "date, expected_error, expected_error_msg",
+    [
+        ("not a date", ValueError, "Reference date is invalid"),
+        (np.nan, ValueError, "Reference date is invalid"),
+        (None, ValueError, "Reference date is invalid"),
+        (date.today() + timedelta(days=1), ValueError, "Reference date is in the future")
+    ]
+)
+def test_function_raises_proper_error_when_invalid_ref_date(date, expected_error, expected_error_msg, sample_input_df):
+    df = sample_input_df.copy()
+    ref_date = date
+    with pytest.raises(expected_error) as exc_info:
+        calculate_customer_retention(df, ref_date)
+    assert str(exc_info.value) == expected_error_msg

@@ -10,6 +10,17 @@ def calculate_customer_retention(df, reference_date):
         if col not in df.columns:
             raise KeyError("Missing required column(s).")
 
+    # Convert reference_date to proper pandas datetime object
+    reference_date = pd.to_datetime(reference_date, errors="coerce")
+
+    # Check reference_date is a valid date
+    if not isinstance(reference_date, pd.Timestamp):
+        raise ValueError("Reference date is invalid")
+
+    # Check reference_date is not in the future
+    if reference_date.normalize() > pd.Timestamp.today().normalize():
+        raise ValueError("Reference date is in the future")
+
     # Check order_id has no empty values
     if df["order_id"].isna().any():
         raise ValueError("Missing value(s) in order_id. This is not allowed.")
