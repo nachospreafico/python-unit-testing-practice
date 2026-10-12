@@ -39,6 +39,10 @@ def calculate_customer_retention(df, reference_date):
     # Check if errors in order_date
     if df["order_date"].isna().any():
         raise ValueError("Invalid date value(s) in order_date. This is not allowed.")
+
+    # Check if any order_date is later than reference_date
+    if (df["order_date"].dt.normalize() > reference_date.normalize()).any():
+        raise ValueError("Order date cannot be later than reference date")
     
     # Check value types in revenue column
     if not all(
@@ -54,3 +58,28 @@ def calculate_customer_retention(df, reference_date):
     # Check if negative values in revenue
     if (df["revenue"] < 0).any():
         raise ValueError("Negative value(s) in revenue. This is not allowed.")
+
+    # Produce the output df
+    output = df.groupby("customer_id", as_index=False).agg(
+        total_orders=("order_id", "count"),
+        total_revenue=("revenue", "sum"),
+        first_order_date=("order_date", "min"),
+        last_order_date=("order_date", "max")
+    )
+
+    # Helper function for customer status classification
+    def get_customer_status(row):
+        days_since_last_order = (reference_date - row["last_order_date"]).days
+        if days_since_last_order <= 60 and row["total_orders"] >= 2:
+            return "Active Repeat"
+        elif days_since_last_order <= 60 and row["total_orders"] == 1:
+            return "Active New"
+        elif days_since_last_order > 60:
+            return "Inactive"
+        else:
+            return "Unknown Status"
+
+    # Add customer_status column to output df
+    output["customer_status"] = output.apply(get_customer_status, axis=1)
+
+    return output

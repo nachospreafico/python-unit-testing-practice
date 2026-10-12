@@ -138,3 +138,27 @@ def test_function_raises_proper_error_when_invalid_ref_date(date, expected_error
     with pytest.raises(expected_error) as exc_info:
         calculate_customer_retention(df, ref_date)
     assert str(exc_info.value) == expected_error_msg
+
+def test_function_raises_error_when_order_date_is_later_than_reference_date(sample_input_df):
+    df = sample_input_df.copy()
+    ref_date = "2026-10-03"
+    later_order_date = "2026-10-04"
+    df.loc[5, "order_date"] = later_order_date
+    with pytest.raises(ValueError) as exc_info:
+        calculate_customer_retention(df, ref_date)
+    assert str(exc_info.value) == "Order date cannot be later than reference date"
+
+def test_function_returns_expected_output(sample_input_df, sample_output_df):
+    df = sample_input_df.copy()
+    ref_date = "2026-10-03"
+    function_output = calculate_customer_retention(df, ref_date)
+    expected_output = sample_output_df.copy()
+    expected_output["first_order_date"] = pd.to_datetime(expected_output["first_order_date"])
+    expected_output["last_order_date"] = pd.to_datetime(expected_output["last_order_date"])
+    pd.testing.assert_frame_equal(function_output, expected_output)
+
+def test_function_does_not_mutate_original_df(sample_input_df):
+    df = sample_input_df.copy()
+    ref_date = "2026-10-03"
+    calculate_customer_retention(df, ref_date)
+    pd.testing.assert_frame_equal(df, sample_input_df)
