@@ -61,3 +61,41 @@ def test_function_raises_proper_error_when_invalid_value_in_quantity(invalid_val
     with pytest.raises(ValueError) as exc_info:
         clean_orders(df)
     assert str(exc_info.value) == "Quantity must be greater than zero."
+
+@pytest.mark.parametrize(
+    "invalid_type",
+    ("3.50", True, "free")
+)
+def test_function_raises_proper_error_when_invalid_type_in_unit_price(invalid_type, sample_input_df):
+    df = sample_input_df.copy()
+    df["unit_price"] = df["unit_price"].astype(object)
+    df.loc[2, "unit_price"] = invalid_type
+    with pytest.raises(TypeError) as exc_info:
+        clean_orders(df)
+    assert str(exc_info.value) == "Invalid data type in unit_price column."
+
+@pytest.mark.parametrize(
+    "invalid_value",
+    (-1.0, -0.01, float("inf"), float("-inf"))
+)
+def test_function_raises_value_error_when_invalid_values_in_unit_price(invalid_value, sample_input_df):
+    df = sample_input_df.copy()
+    df["unit_price"] = df["unit_price"].astype(object)
+    df.loc[2, "unit_price"] = invalid_value
+    with pytest.raises(ValueError) as exc_info:
+        clean_orders(df)
+    assert str(exc_info.value) == "Invalid value in unit_price column."
+
+def test_function_correctly_outputs_when_zero_in_unit_price(sample_input_df):
+    df = sample_input_df.copy()
+    df.loc[2, "unit_price"] = 0.0
+    expected_output = pd.DataFrame(
+        {
+            "order_id": [1, 2, 3, 4, 5],
+            "customer_id": [101, 101, 102, 103, 102],
+            "quantity": [5, 10, 3, 5, 7],
+            "unit_price": [3.00, 2.00, 0.0, 5.00, 2.00]
+        }
+    )
+    func_output = clean_orders(df)
+    pd.testing.assert_frame_equal(func_output, expected_output)

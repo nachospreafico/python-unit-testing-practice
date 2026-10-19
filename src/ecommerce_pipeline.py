@@ -1,3 +1,5 @@
+import numpy as np
+
 def clean_orders(df):
     # Create defensive copy
     df = df.copy()
@@ -20,7 +22,19 @@ def clean_orders(df):
         raise ValueError("Quantity must be greater than zero.")
 
     # Restore quantity column to int type
-    df["quantity"] = df["quantity"].astype(int)
+    df["quantity"] = df["quantity"].astype("int64")
+
+    # Check for invalid dtypes in unit_price column
+    if not all(type(value) is int or type(value) is float for value in df["unit_price"]):
+        raise TypeError("Invalid data type in unit_price column.")
+
+    # Check for invalid values in unit_price column
+    if any(
+        value < 0 or
+        not np.isfinite(value)
+        for value in df["unit_price"]
+    ):
+        raise ValueError("Invalid value in unit_price column.")
 
     # Reset df index
     df = df.reset_index(drop=True)
