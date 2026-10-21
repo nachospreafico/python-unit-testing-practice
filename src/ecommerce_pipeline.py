@@ -13,6 +13,14 @@ def clean_orders(df):
     # Drop rows with missing values in quantity and/or unit_price
     df = df.dropna(subset=["quantity", "unit_price"])
 
+    # Check for missing values in order_id
+    if df["order_id"].isna().any():
+        raise ValueError("Invalid value(s) in order_id.")
+
+    # Check for duplicated values in order_id
+    if df["order_id"].duplicated().any():
+        raise ValueError("Duplicated value(s) in order_id. This is not allowed.")
+
     # Check for invalid dtypes in quantity column
     if not all(type(value) is int for value in df["quantity"]):
         raise TypeError("Invalid data type in quantity column.")

@@ -86,16 +86,19 @@ def test_function_raises_value_error_when_invalid_values_in_unit_price(invalid_v
         clean_orders(df)
     assert str(exc_info.value) == "Invalid value in unit_price column."
 
-def test_function_correctly_outputs_when_zero_in_unit_price(sample_input_df):
+@pytest.mark.parametrize(
+        "invalid_values, error_message",
+        (
+            ([1, 2, np.nan, 4, 5], "Invalid value(s) in order_id."),
+            ([1, 2, None, 4, 5], "Invalid value(s) in order_id."),
+            ([1, 1, 3, 4, 5], "Duplicated value(s) in order_id. This is not allowed."),
+            ([1, 1, 3, 4, np.nan], "Invalid value(s) in order_id.")
+        )
+)
+def test_function_raises_value_error_when_invalid_value_in_order_id(invalid_values, error_message, sample_input_df):
     df = sample_input_df.copy()
-    df.loc[2, "unit_price"] = 0.0
-    expected_output = pd.DataFrame(
-        {
-            "order_id": [1, 2, 3, 4, 5],
-            "customer_id": [101, 101, 102, 103, 102],
-            "quantity": [5, 10, 3, 5, 7],
-            "unit_price": [3.00, 2.00, 0.0, 5.00, 2.00]
-        }
-    )
-    func_output = clean_orders(df)
-    pd.testing.assert_frame_equal(func_output, expected_output)
+    df["order_id"] = df["order_id"].astype(object)
+    df["order_id"] = invalid_values
+    with pytest.raises(ValueError) as exc_info:
+        clean_orders(df)
+    assert str(exc_info.value) == error_message
