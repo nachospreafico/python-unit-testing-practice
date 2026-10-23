@@ -21,6 +21,10 @@ def clean_orders(df):
     if df["order_id"].duplicated().any():
         raise ValueError("Duplicated value(s) in order_id. This is not allowed.")
 
+    # Check for missing values in customer_id
+    if df["customer_id"].isna().any():
+        raise ValueError("Invalid value(s) in customer_id.")
+
     # Check for invalid dtypes in quantity column
     if not all(type(value) is int for value in df["quantity"]):
         raise TypeError("Invalid data type in quantity column.")

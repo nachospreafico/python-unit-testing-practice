@@ -102,3 +102,23 @@ def test_function_raises_value_error_when_invalid_value_in_order_id(invalid_valu
     with pytest.raises(ValueError) as exc_info:
         clean_orders(df)
     assert str(exc_info.value) == error_message
+
+@pytest.mark.parametrize(
+        "invalid_value",
+        (
+            np.nan, None
+        )
+)
+def test_function_raises_value_error_when_missing_values_in_customer_id(invalid_value, sample_input_df):
+    df = sample_input_df.copy()
+    df["customer_id"] = df["customer_id"].astype(object)
+    df.loc[2, "customer_id"] = invalid_value
+    with pytest.raises(ValueError) as exc_info:
+        clean_orders(df)
+    assert str(exc_info.value) == "Invalid value(s) in customer_id."
+
+def test_function_does_not_mutate_original_df(sample_input_df):
+    df = sample_input_df.copy()
+    expected_df = sample_input_df.copy()
+    clean_orders(df)
+    pd.testing.assert_frame_equal(df, expected_df)
